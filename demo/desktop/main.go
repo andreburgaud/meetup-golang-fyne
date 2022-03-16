@@ -19,27 +19,24 @@ const (
 	appVersion = "1.0"
 )
 
-// Custom Theme
+var themeColor string
+
+// CUSTOM THEME
 type customTheme struct{}
 
 func (m customTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	if name == theme.ColorNameBackground {
-		cfg, err := GetAppConfig()
 
-		if err != nil {
-			displayError(err)
+		if themeColor == "Default" {
+
 			return theme.DefaultTheme().Color(name, variant)
 		}
 
-		if cfg.Color == "Default" {
-			return theme.DefaultTheme().Color(name, variant)
-		}
-
-		if cfg.Color == "Blue" {
+		if themeColor == "Blue" {
 			return color.NRGBA{R: 0, G: 87, B: 184, A: 255}
 		}
 
-		if cfg.Color == "Yellow" {
+		if themeColor == "Yellow" {
 			return color.NRGBA{R: 254, G: 221, B: 0, A: 255}
 		}
 	}
@@ -58,8 +55,9 @@ func (m customTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(name)
 }
 
-// End of Custom Theme
+// END CUSTOM THEME
 
+// TOOLBAR
 func buildToolbar(w fyne.Window) *widget.Toolbar {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarSpacer(),
@@ -70,32 +68,16 @@ func buildToolbar(w fyne.Window) *widget.Toolbar {
 	return toolbar
 }
 
-func displayError(err error) {
-	fmt.Println(err)
-}
-
-func onColorChange(color string) {
-	err := SaveColor(color)
-	if err != nil {
-		displayError(err)
-		return
-	}
-
-	cfg, err := GetAppConfig()
-	if err != nil {
-		displayError(err)
-		return
-	}
-
-	cfg.Print()
-}
-
+// SELECT (DROPDOWN)
 func buildColorSelect(color string) *widget.Select {
-	s := widget.NewSelect([]string{"Default", "Blue", "Yellow"}, onColorChange)
+	s := widget.NewSelect([]string{"Default", "Blue", "Yellow"}, func(color string) {
+		themeColor = color
+	})
 	s.SetSelected(color)
 	return s
 }
 
+// STATUS BAR
 func buildStatus(color string) *fyne.Container {
 	status := container.NewHBox(layout.NewSpacer(),
 		buildColorSelect(color),
@@ -104,6 +86,7 @@ func buildStatus(color string) *fyne.Container {
 	return status
 }
 
+// FORM (email)
 func buildEmailForm() *widget.Form {
 	to := widget.NewEntry()
 	subject := widget.NewEntry()
@@ -125,6 +108,7 @@ func buildEmailForm() *widget.Form {
 	return form
 }
 
+// FORM (note)
 func buildNoteForm() *widget.Form {
 	note := widget.NewMultiLineEntry()
 	noteItem := widget.NewFormItem("Note:", note)
@@ -141,6 +125,7 @@ func buildNoteForm() *widget.Form {
 	return form
 }
 
+// TABS
 func buildTabs() *container.AppTabs {
 	emailForm := buildEmailForm()
 	noteForm := buildNoteForm()
@@ -151,13 +136,9 @@ func buildTabs() *container.AppTabs {
 	return tabs
 }
 
+// ENTRYPOINT
 func main() {
-	cfg, err := GetAppConfig()
-	if err != nil {
-		fmt.Println(err) // Display error in dialog bix
-	}
-	cfg.Print()
-
+	themeColor = "Default"
 	a := app.New()
 	var _ fyne.Theme = (*customTheme)(nil) // Assert interface fully implemented
 	a.Settings().SetTheme(&customTheme{})
@@ -172,7 +153,7 @@ func main() {
 	))
 	toolbar := buildToolbar(w)
 	tabs := buildTabs()
-	status := buildStatus(cfg.Color)
+	status := buildStatus(themeColor)
 	content := container.New(layout.NewBorderLayout(toolbar, status, nil, nil),
 		toolbar, status, tabs)
 	w.SetContent(content)
