@@ -16,7 +16,7 @@ import (
 
 const (
 	appName    = "Fyne Demo App"
-	appVersion = "1.0"
+	appVersion = "1.1"
 )
 
 var themeColor string
@@ -28,7 +28,6 @@ func (m customTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) 
 	if name == theme.ColorNameBackground {
 
 		if themeColor == "Default" {
-
 			return theme.DefaultTheme().Color(name, variant)
 		}
 
@@ -68,6 +67,24 @@ func buildToolbar(w fyne.Window) *widget.Toolbar {
 	return toolbar
 }
 
+// func lightTheme(isLight bool) {
+// 	a := fyne.CurrentApp()
+// 	if isLight {
+// 		a.Settings().SetTheme(theme.LightTheme())
+// 	} else {
+// 		a.Settings().SetTheme(theme.DarkTheme())
+// 	}
+// }
+
+
+// func themeOption() *widget.Check {
+// 	c := widget.NewCheck("Light", func(value bool) {
+// 		lightTheme(value)
+// 	})
+// 	c.SetChecked(true)
+// 	return c
+// }
+
 // SELECT (DROPDOWN)
 func buildColorSelect(color string) *widget.Select {
 	s := widget.NewSelect([]string{"Default", "Blue", "Yellow"}, func(color string) {
@@ -80,6 +97,7 @@ func buildColorSelect(color string) *widget.Select {
 // STATUS BAR
 func buildStatus(color string) *fyne.Container {
 	status := container.NewHBox(layout.NewSpacer(),
+		//themeOption(),
 		buildColorSelect(color),
 		widget.NewLabel("Status:"), widget.NewLabel("Ok"),
 	)
